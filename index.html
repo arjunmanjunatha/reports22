@@ -1,342 +1,759 @@
+<!DOCTYPE html>
 <html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
-  <head>
-    <title>Report 22</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.0.0-rc.7/html2canvas.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" defer></script>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0 auto;
-        max-width: 800px;
-        padding: 20px;
-      }
+     <!-- Include the Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4; /* Light gray background */
+    color: #333;
+}
 
-      h1 {
-        text-align: center;
-        color: #333;
-      }
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
 
-      .btn {
-        display: block;
-        width: 200px;
-        height: 40px;
-        margin: 20px auto;
-        background: #3498db;
-        color: #fff;
-        border: none;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 16px;
-        outline: none;
-        transition: background-color 0.3s ease;
-      }
+.sidebar {
+    flex: 1;
+    margin-right: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
 
-      .btn:hover {
-        background-color: #2980b9;
-      }
+.sidebar div {
+    margin-bottom: 20px;
+}
 
-      .btn:active {
-        background-color: #3498db;
-        box-shadow: 0 5px #2980b9;
-        transform: translateY(4px);
-      }
+.sidebar input {
+    width: 100%;
+}
 
-      #csvFile {
-        display: none;
-      }
+.sidebar button {
+    width: 100%;
+    margin-top: 10px;
+}
 
-      #uploadLabel {
-        display: inline-block;
-        margin: 0 auto 20px;
-      }
+.main {
+    flex: 2;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
 
-      #statusMessage {
-        color: #2ecc71;
-        /* Default to the "success" color */
-        text-align: center;
-        margin-bottom: 20px;
-      }
+.viewport {
+    position: relative;
+    margin-top: 20px;
+    height: 500px;
+    overflow: auto;
+}
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
+.viewport .partner,
+.viewport .date {
+    position: absolute;
+    top: 10px;
+}
 
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: center;
-      }
+.viewport .partner {
+    left: 10px;
+}
 
-      tr:nth-child(even) {
-        background-color: #f2f2f2;
-      }
+.viewport .date {
+    right: 10px;
+}
 
-      #resultsWindow {
-        border: 1px solid #ddd;
-        padding: 10px;
-        background-color: #f8f9fa;
-        margin-top: 20px;
-      }
-      #resultsWindow {
+button {
+    background-color: #293BFF;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+
+button:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.download-buttons {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #293BFF;
+    color: white;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+.tabcontent {
     display: none;
 }
 
+.tabbutton {
+    background-color: #293BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-align: center;
+}
 
-    </style>
+.tabbutton.active {
+    background-color: #1a1aff;
+}
+.tabbutton {
+  display: none;
+}
 
-        
+</style>
+    <title>Reports22</title>
 
-  </head>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>Reports22</h1>
+            <div class="upload-container">
+                <div>
+                    <button id="upload-hub-csv">Upload HUB CSV</button>
+<input type="file" id="hub-csv" accept=".csv" style="display: none;">
 
-  <body>
-    <h1>Report 22</h1>
+                    <div id="hub-message" class="message"></div>
+                </div>
+                <div>
+                   
+                    <button id="upload-airplane-csv">Upload AIRPLANE CSV</button>
+<input type="file" id="airplane-csv" accept=".csv" style="display: none;">
 
-    <label id="uploadLabel" for="csvFile" class="btn">Upload CSV</label>
-    <input type="file" id="csvFile" accept=".csv">
-
-    <p id="statusMessage"></p>
-
-    <button id="generateReport" class="btn">Generate Report</button>
-
-    <div id="resultsWindow">
-      <table id="reportTable">
-        <thead>
-          <tr>
-            <th>Month, Year</th>
-            <th>Commission (USD)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- tbody is left empty as rows will be appended dynamically -->
-        </tbody>
-      </table>
+                    <div id="airplane-message" class="message"></div>
+                </div>
+            </div>
+            <div class="report-buttons">
+                <button id="payout-projection">Payout Projection Calendar</button>
+                <button id="cancellations-trend">Cancellations Trend</button>
+                <button id="provider-breakdown">Provider Breakdown</button>
+                <button id="pop-report">POP Report</button>
+                <button id="booking-insights">Booking Insights</button>
+                <button id="user-insights">User Insights</button>
+                <button id="comprehensive-report" class="big">Comprehensive Report</button>
+                <button id="custom-download" class="big">Custom to Download</button>
+            </div>
+            <div class="download-buttons">
+                <button id="copy-to-clipboard" disabled>Copy to Clipboard</button>
+            </div>
+            <label for="ignore-cancellations">Ignore cancellations:</label>
+            <input type="checkbox" id="ignore-cancellations">
+        </div>
+        <div class="main">
+            <h2>Results</h2>
+            <div class="viewport" id="viewport">
+               <div id="partner-id-display"></div>
+                <canvas id="chart"></canvas>
+                <div class="partner" id="partner"></div>
+                <div class="date" id="date"></div>
+            </div>
+        </div>
     </div>
-<button id="generateCancellationsReport" class="btn">Cancellations Report</button>
+    <!-- Tab buttons -->
+    <div class="tab">
+        <button class="tabbutton" id="pop-by-providers-btn">POP by Providers</button>
+        <button class="tabbutton" id="pop-revenue-btn">POP Revenue</button>
+        <button class="tabbutton" id="pop-vs-direct-btn">POP vs Direct</button>
+    </div>
+ 
 
-<div id="cancellationsResultsWindow" style="display: none;">
-    <table id="cancellationsReportTable">
-    <thead>
-        <tr>
-            <th>Month, Year</th>
-            <th>Total Bookings</th>
-            <th>Cancelled Bookings</th>
-            <th>Cancellation Percentage</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
-</div>
+    <!-- Tab content -->
+    <div id="pop-by-providers" class="tabcontent">
+        <canvas id="pop-by-providers-canvas"></canvas>
+    </div>
 
-    <button id="saveAsImage" class="btn">Copy Table to Clipboard</button>
+    <div id="pop-revenue" class="tabcontent">
+        <canvas id="pop-revenue-canvas"></canvas>
+    </div>
 
+    <div id="pop-vs-direct" class="tabcontent">
+        <canvas id="pop-vs-direct-canvas"></canvas>
+    </div>
 
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var data = [];
-    document.getElementById('csvFile').addEventListener('change', function(e) {
-        var file = e.target.files[0];
-        Papa.parse(file, {
-            header: true,
-            complete: function (results) {
-                var expectedHeaders = [
-                    'Provider', 'Category', 'Booked Date', 'Start Date', 'End Date', 
-                    'Booking Status', 'Commission', 'Device', 'Campaign IDs', 'Nights', 
-                    'Info', 'Destination', 'Booking Id', 'User Country', 'Payment Status'
-                ];
-                if(JSON.stringify(results.meta.fields) === JSON.stringify(expectedHeaders)) {
-                    data = results.data;
-                    document.getElementById('statusMessage').style.color = '#2ecc71';
-                    document.getElementById('statusMessage').innerText = 'Ready to generate, boss!';
-                } else {
-                    document.getElementById('statusMessage').style.color = '#e74c3c';
-                    document.getElementById('statusMessage').innerText = 'You trippin, bro?';
-                }
-            }
-        });
-    });
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script> 
+// Declare these variables at the top of your script
+var hubData, airplaneData;
 
-    document.getElementById('generateReport').addEventListener('click', function() {
-    var file = document.getElementById('csvFile').files[0];
-    Papa.parse(file, {
+// CSV Files validation
+function validateFile(file, expectedHeaders) {
+  return new Promise((resolve, reject) => {
+    if (!file.name.endsWith('.csv')) {
+      reject('File is not a CSV file');
+    } else {
+      Papa.parse(file, {
         header: true,
-        complete: function (results) {
-            var data = results.data;
-            var commissions = [];
-
-            // define the variables for subtitle values
-            var commissionWithdrawn = 0;
-            var commissionAging = 0;
-            var commissionAvailable = 0;
-
-            data.forEach(function (record) {
-                if(record['Booking Status'] !== 'Canceled') {
-                    var endDate = record['End Date'] ? new Date(record['End Date']) : null;
-                    var bookedDate = new Date(record['Booked Date']);
-                    var payoutDate;
-
-                    if(endDate) {
-                        payoutDate = new Date(endDate);
-                        payoutDate.setDate(payoutDate.getDate() + 7);
-                    } else {
-                        payoutDate = new Date(bookedDate);
-                        payoutDate.setDate(payoutDate.getDate() + 90);
-                    }
-
-                    var monthYear = `${payoutDate.getMonth() + 1}/01/${payoutDate.getFullYear()}`;
-                    var existing = commissions.find(com => com.date === monthYear);
-
-                    if(existing) {
-                        existing.commission += parseFloat(record['Commission']);
-                    } else {
-                        commissions.push({ date: monthYear, commission: parseFloat(record['Commission']) });
-                    }
-
-                    // Calculate subtitle values
-                    switch(record['Payment Status']) {
-                        case 'PAID':
-                            commissionWithdrawn += parseFloat(record['Commission']);
-                            break;
-                        case 'PENDING':
-                            commissionAging += parseFloat(record['Commission']);
-                            break;
-                        case 'READY':
-                            commissionAvailable += parseFloat(record['Commission']);
-                            break;
-                    }
-                }
-            });
-
-            // Remove previous titles and subtitles if they exist
-            var oldReportTitle = document.getElementById('reportTitle');
-            if(oldReportTitle) oldReportTitle.remove();
-            var oldCommissionWithdrawnSubtitle = document.getElementById('commissionWithdrawn');
-            if(oldCommissionWithdrawnSubtitle) oldCommissionWithdrawnSubtitle.remove();
-            var oldCommissionAgingSubtitle = document.getElementById('commissionAging');
-            if(oldCommissionAgingSubtitle) oldCommissionAgingSubtitle.remove();
-            var oldCommissionAvailableSubtitle = document.getElementById('commissionAvailable');
-            if(oldCommissionAvailableSubtitle) oldCommissionAvailableSubtitle.remove();
-
-            // Update the report title with the current date
-            var reportTitle = document.createElement('h1');
-            reportTitle.id = 'reportTitle';
-            reportTitle.textContent = `Commission Status Projection on ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
-
-            // Create and update the subtitles
-            var commissionWithdrawnSubtitle = document.createElement('p');
-            commissionWithdrawnSubtitle.id = 'commissionWithdrawn';
-            commissionWithdrawnSubtitle.textContent = `Commission Withdrawn / Requested: ${commissionWithdrawn.toFixed(2)}`;
-
-            var commissionAgingSubtitle = document.createElement('p');
-            commissionAgingSubtitle.id = 'commissionAging';
-            commissionAgingSubtitle.textContent = `Commission Aging: ${commissionAging.toFixed(2)}`;
-
-            // Display the commission available to withdraw in the appropriate color
-            var commissionAvailableSubtitle = document.createElement('p');
-            commissionAvailableSubtitle.id = 'commissionAvailable';
-            commissionAvailableSubtitle.textContent = `Commission Available to Withdraw: ${commissionAvailable.toFixed(2)}`;
-            if(commissionAvailable > 100) {
-                commissionAvailableSubtitle.style.color = 'green';
-            } else {
-                commissionAvailableSubtitle.style.color = 'red';
+        preview: 1,
+        complete: function(results) {
+          var headers = results.meta.fields;
+          for (var i = 0; i < expectedHeaders.length; i++) {
+            if (!headers.includes(expectedHeaders[i])) {
+              reject('Missing header: ' + expectedHeaders[i]);
+              return;
             }
-
-            // Append the titles and subtitles to the results window
-var resultsWindow = document.getElementById('resultsWindow');
-
-// Get the first child of the results window (which should be the table)
-var firstChild = resultsWindow.firstChild;
-
-// Insert the report title and subtitles before the table
-resultsWindow.insertBefore(reportTitle, firstChild);
-resultsWindow.insertBefore(commissionWithdrawnSubtitle, firstChild);
-resultsWindow.insertBefore(commissionAgingSubtitle, firstChild);
-resultsWindow.insertBefore(commissionAvailableSubtitle, firstChild);
-
-
-            // Show the table after data is processed
-            resultsWindow.style.display = 'block';
-
-            // Sort the commissions array chronologically
-            commissions.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            var tableBody = document.querySelector('#reportTable tbody');
-            tableBody.innerHTML = ''; // clear the table body
-
-            commissions.forEach(function(commission) {
-                var row = document.createElement('tr');
-                var monthYearCell = document.createElement('td');
-                monthYearCell.textContent = new Date(commission.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                var commissionCell = document.createElement('td');
-                commissionCell.textContent = commission.commission.toFixed(2);
-
-                row.appendChild(monthYearCell);
-                row.appendChild(commissionCell);
-                tableBody.appendChild(row);
-            });
+          }
+          resolve();
         }
+      });
+    }
+  });
+}
+
+var hubData, airplaneData;
+var lastUploaded;
+
+document.getElementById('upload-hub-csv').addEventListener('click', function() {
+  document.getElementById('hub-csv').click();
+});
+
+document.getElementById('hub-csv').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  var expectedHeaders = ['Provider', 'Category', 'Booked Date', 'Start Date', 'End Date', 'Booking Status', 'Commission', 'Device', 'Campaign IDs', 'Nights', 'Info', 'Destination', 'Booking Id', 'User Country', 'Payment Status'];
+  validateFile(file, expectedHeaders)
+    .then(function() {
+      document.getElementById('hub-message').textContent = 'Ready to run, Boss';
+      document.getElementById('hub-message').classList.add('success');
+      document.getElementById('hub-message').classList.remove('error');
+      Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+          hubData = results.data;
+          compareData();
+        }
+      });
+      lastUploaded = 'HUB';
+    })
+    .catch(function(error) {
+      document.getElementById('hub-message').textContent = 'You trippin, bro? Wrong CSV! ' + error;
+      document.getElementById('hub-message').classList.add('error');
+      document.getElementById('hub-message').classList.remove('success');
     });
 });
 
+document.getElementById('upload-airplane-csv').addEventListener('click', function() {
+  document.getElementById('airplane-csv').click();
+});
 
-   document.getElementById('generateCancellationsReport').addEventListener('click', function() {
-    var cancellations = [];
+document.getElementById('airplane-csv').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  var expectedHeaders = ['bookingId', 'partnerId', 'campaignId', 'commission', 'status', 'paid', 'category', 'insertedDate', 'lastUpdatedDate', 'provider', 'bookedDate', 'startDate', 'endDate', 'destinationCity', 'destinationCountry', 'product', 'source', 'device', 'userCountry', 'browserName', 'osName', 'distanceUserFromDest', 'userTimezone'];
+  validateFile(file, expectedHeaders)
+    .then(function() {
+      document.getElementById('airplane-message').textContent = 'Ready to run, Boss';
+      document.getElementById('airplane-message').classList.add('success');
+      document.getElementById('airplane-message').classList.remove('error');
+      Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+          airplaneData = results.data;
+          compareData();
+        }
+      });
+      lastUploaded = 'AIRPLANE';
+    })
+    .catch(function(error) {
+      document.getElementById('airplane-message').textContent = 'You trippin, bro? Wrong CSV! ' + error;
+      document.getElementById('airplane-message').classList.add('error');
+      document.getElementById('airplane-message').classList.remove('success');
+    });
+});
 
-    data.forEach(function (record) {
-        var bookedDate = new Date(record['Booked Date']);
-        var monthYear = `${bookedDate.getMonth() + 1}/01/${bookedDate.getFullYear()}`;
-        var existing = cancellations.find(com => com.date === monthYear);
+function compareData() {
+  if (!hubData || !airplaneData) {
+    return;
+  }
 
-        if(existing) {
-            existing.totalBookings += 1;
-            if(record['Booking Status'].toLowerCase() === 'canceled') {
-                existing.cancelledBookings += 1;
-            }
+  var mismatchedBookings = [];
+  var matchedBookings = 0;
+
+  for (var i = 0; i < hubData.length; i++) {
+    for (var j = 0; j < airplaneData.length; j++) {
+      if (hubData[i]['Booking Id'] === airplaneData[j]['bookingId']) {
+        if (parseFloat(hubData[i]['Commission']) !== parseFloat(airplaneData[j]['commission']) ||
+          new Date(hubData[i]['Booked Date']).toISOString() !== new Date(airplaneData[j]['bookedDate']).toISOString() ||
+          new Date(hubData[i]['Start Date']).toISOString() !== new Date(airplaneData[j]['startDate']).toISOString() ||
+          hubData[i]['Provider'].toLowerCase() !== airplaneData[j]['provider']) {
+          mismatchedBookings.push(hubData[i]['Booking Id']);
+          console.log('Mismatched booking ID: ' + hubData[i]['Booking Id']); // Add this line
+          console.log('HUB Commission: ' + parseFloat(hubData[i]['Commission']) + ', AIRPLANE Commission: ' + parseFloat(airplaneData[j]['commission'])); // Add this line
+          console.log('HUB Booked Date: ' + new Date(hubData[i]['Booked Date']).toISOString() + ', AIRPLANE Booked Date: ' + new Date(airplaneData[j]['bookedDate']).toISOString()); // Add this line
+          console.log('HUB Start Date: ' + new Date(hubData[i]['Start Date']).toISOString() + ', AIRPLANE Start Date: ' + new Date(airplaneData[j]['startDate']).toISOString()); // Add this line
+          console.log('HUB Provider: ' + hubData[i]['Provider'].toLowerCase() + ', AIRPLANE Provider: ' + airplaneData[j]['provider']); // Add this line
         } else {
-            cancellations.push({
-                date: monthYear,
-                totalBookings: 1,
-                cancelledBookings: record['Booking Status'].toLowerCase() === 'canceled' ? 1 : 0
-            });
+          matchedBookings++;
         }
+        break;
+      }
+    }
+  }
+
+  if (mismatchedBookings.length > 0 && matchedBookings > 0) {
+    document.getElementById('hub-message').textContent = 'Date range may not match';
+    document.getElementById('hub-message').classList.add('error');
+    document.getElementById('hub-message').classList.remove('success');
+  } else if (mismatchedBookings.length > 0 && lastUploaded === 'AIRPLANE') {
+    document.getElementById('hub-message').textContent = 'Please upload CSV from ' + airplaneData[0]['partnerId'];
+    document.getElementById('hub-message').classList.add('error');
+    document.getElementById('hub-message').classList.remove('success');
+  } else if (mismatchedBookings.length > 0) {
+    document.getElementById('hub-message').textContent = 'AID Mismatch';
+    document.getElementById('hub-message').classList.add('error');
+    document.getElementById('hub-message').classList.remove('success');
+  } else {
+    document.getElementById('hub-message').textContent = 'Yup, looks about right';
+    document.getElementById('hub-message').classList.add('success');
+    document.getElementById('hub-message').classList.remove('error');
+  }
+
+
+
+}
+
+//PAYOUT PROJECTION FUNCTION
+document.getElementById('payout-projection').addEventListener('click', function() {
+  // Clear the viewport
+  document.getElementById('viewport').innerHTML = '';
+  if (!hubData) {
+    alert('Please upload a valid HUB CSV file');
+    return;
+  }
+
+  var payoutData = {};
+  var payoutDate;
+  var totalPaid = 0;
+  var totalPending = 0;
+  var totalReady = 0;
+
+  for (var i = 0; i < hubData.length; i++) {
+    if (hubData[i]['Booking Status'] !== 'CANCELED') {
+      if (hubData[i]['End Date']) {
+        payoutDate = new Date(hubData[i]['End Date']);
+        payoutDate.setDate(payoutDate.getDate() + 7);
+      } else {
+        payoutDate = new Date(hubData[i]['Booked Date']);
+        payoutDate.setDate(payoutDate.getDate() + 90);
+      }
+
+      var monthYear = payoutDate.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+      });
+
+      if (!payoutData[monthYear]) {
+        payoutData[monthYear] = 0;
+      }
+
+      var commission = parseFloat(hubData[i]['Commission']);
+      payoutData[monthYear] += commission;
+
+      switch (hubData[i]['Payment Status']) {
+        case 'PAID':
+          totalPaid += commission;
+          break;
+        case 'PENDING':
+          totalPending += commission;
+          break;
+        case 'READY':
+          totalReady += commission;
+          break;
+      }
+    }
+  }
+
+  var result = '<p>TOTAL COMMISSIONS PAID: <span style="color:black">$' + totalPaid.toFixed(2) + '</span></p>';
+  result += '<p>COMMISSION CURRENTLY AGING: <span style="color:orange">$' + totalPending.toFixed(2) + '</span></p>';
+  result += '<p>Commission READY to withdraw now: <span style="color:green">$' + totalReady.toFixed(2) + '</span></p>';
+  result += '<table><tr><th>Month</th><th>Projected Available for Withdrawal</th></tr>';
+  var sortedDates = Object.keys(payoutData).sort(function(a, b) {
+    return new Date(a) - new Date(b);
+  });
+
+  for (var i = 0; i < sortedDates.length; i++) {
+    result += '<tr><td>' + sortedDates[i] + '</td><td>' + payoutData[sortedDates[i]].toFixed(2) + '</td></tr>';
+  }
+
+  result += '</table>';
+
+  document.getElementById('viewport').innerHTML = result;
+});
+
+// cancellations trend function
+document.getElementById('cancellations-trend').addEventListener('click', function() {
+  if (!hubData) {
+    alert('Please upload a valid HUB CSV file');
+    return;
+  }
+
+  var bookingData = {};
+  var cancellationData = {};
+
+  for (var i = 0; i < hubData.length; i++) {
+    var bookedDate = new Date(hubData[i]['Booked Date']);
+    var monthYear = bookedDate.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
     });
 
-    // Sort the cancellations array chronologically
-    cancellations.sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (!bookingData[monthYear]) {
+      bookingData[monthYear] = 0;
+    }
 
-    var tableBody = document.querySelector('#cancellationsReportTable tbody');
-    tableBody.innerHTML = ''; // clear the table body
+    bookingData[monthYear]++;
 
-    cancellations.forEach(function(cancellation) {
-        var row = document.createElement('tr');
+    if (hubData[i]['Booking Status'] === 'CANCELED') {
+      if (!cancellationData[monthYear]) {
+        cancellationData[monthYear] = 0;
+      }
 
-        var monthYearCell = document.createElement('td');
-        monthYearCell.textContent = new Date(cancellation.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        var totalBookingsCell = document.createElement('td');
-        totalBookingsCell.textContent = cancellation.totalBookings;
-        var cancelledBookingsCell = document.createElement('td');
-        cancelledBookingsCell.textContent = cancellation.cancelledBookings;
-        var cancellationPercentageCell = document.createElement('td');
-        cancellationPercentageCell.textContent = `${(cancellation.cancelledBookings / cancellation.totalBookings * 100).toFixed(2)}%`;
+      cancellationData[monthYear]++;
+    }
+  }
 
-        row.appendChild(monthYearCell);
-        row.appendChild(totalBookingsCell);
-        row.appendChild(cancelledBookingsCell);
-        row.appendChild(cancellationPercentageCell);
-        tableBody.appendChild(row);
-    });
+  var result = '<table><tr><th>Date</th><th>Total Bookings</th><th>Cancelled Bookings</th><th>Cancellation Rate</th></tr>';
+  var sortedDates = Object.keys(bookingData).sort(function(a, b) {
+    return new Date(a) - new Date(b);
+  });
 
-    // Show the table after data is processed
-    document.getElementById('cancellationsResultsWindow').style.display = 'block';
+  for (var i = 0; i < sortedDates.length; i++) {
+    var totalBookings = bookingData[sortedDates[i]];
+    var cancelledBookings = cancellationData[sortedDates[i]] || 0;
+    var cancellationRate = (cancelledBookings / totalBookings * 100).toFixed(2) + '%';
+
+    result += '<tr><td>' + sortedDates[i] + '</td><td>' + totalBookings + '</td><td>' + cancelledBookings + '</td><td>' + cancellationRate + '</td></tr>';
+  }
+
+  result += '</table>';
+
+  document.getElementById('viewport').innerHTML = result;
 });
+
+//POP REPORT
+function generatePopReport() {
+  // Clear the viewport
+  document.getElementById('viewport').innerHTML = '';
+  // Fetch the CSV data
+  Papa.parse(document.getElementById('airplane-csv').files[0], {
+    header: true,
+    complete: function(results) {
+      // Process the data to get the counts for each provider
+      let providerCounts = {};
+      let providerRevenue = {};
+      let popCounts = 0;
+      let directCounts = 0;
+      for (let row of results.data) {
+        if (document.getElementById('ignore-cancellations').checked && row.status === 'canceled') {
+          continue;
+        }
+        if (row.source === 'pop') {
+          let provider = row.provider;
+          if (!providerCounts[provider]) {
+            providerCounts[provider] = 0;
+            providerRevenue[provider] = 0;
+          }
+          providerCounts[provider]++;
+          providerRevenue[provider] += parseFloat(row.commission);
+          popCounts++;
+        } else {
+          directCounts++;
+        }
+      }
+
+      // Prepare the data for the bar charts
+      let labels = Object.keys(providerCounts);
+      let counts = Object.values(providerCounts);
+      let revenues = Object.values(providerRevenue);
+
+      // Get the viewport element
+      let viewport = document.getElementById('viewport');
+      // Create the bar charts
+
+      // Create a heading for the first chart
+      let heading1 = document.createElement('h2');
+      heading1.textContent = 'POP bookings by Provider';
+      heading1.style.fontWeight = 'bold';
+      viewport.appendChild(heading1);
+
+      let ctx1 = document.createElement('canvas');
+      ctx1.id = 'pop-by-providers';
+      viewport.appendChild(ctx1);
+      new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Provider Counts (Total: ' + counts.reduce((a, b) => a + b, 0) + ')',
+            data: counts,
+            backgroundColor: 'rgba(0,123,255,0.5)',
+            borderColor: 'rgba(0,123,255,1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            datalabels: {
+              color: '#000000',
+              anchor: 'end',
+              align: 'top',
+              formatter: function(value, context) {
+                return value;
+              }
+            }
+          }
+        }
+      });
+
+      // Create a heading for the second chart
+      let heading2 = document.createElement('h2');
+      heading2.textContent = 'POP Revenue per provider';
+      heading2.style.fontWeight = 'bold';
+      viewport.appendChild(heading2);
+
+      let ctx2 = document.createElement('canvas');
+      ctx2.id = 'pop-revenue';
+      viewport.appendChild(ctx2);
+      new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Provider Revenue (Total: $' + revenues.reduce((a, b) => a + b, 0).toFixed(2) + ')',
+            data: revenues,
+            backgroundColor: 'rgba(0,123,255,0.5)',
+            borderColor: 'rgba(0,123,255,1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            datalabels: {
+              color: '#000000',
+              anchor: 'end',
+              align: 'top',
+              formatter: function(value, context) {
+                return '$' + value.toFixed(2);
+              }
+            }
+          }
+        }
+      });
+
+      // Create a heading for the third chart
+      let heading3 = document.createElement('h2');
+      heading3.textContent = 'POP vs DIRECT';
+      heading3.style.fontWeight = 'bold';
+      viewport.appendChild(heading3);
+
+      let ctx3 = document.createElement('canvas');
+      ctx3.id = 'pop-vs-direct';
+      viewport.appendChild(ctx3);
+      new Chart(ctx3, {
+        type: 'pie',
+        data: {
+          labels: ['POP', 'Direct'],
+          datasets: [{
+            data: [popCounts, directCounts],
+            backgroundColor: ['rgba(0,123,255,0.5)', 'rgba(255,99,132,0.5)'],
+            borderColor: ['rgba(0,123,255,1)', 'rgba(255,99,132,1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: {
+            datalabels: {
+              color: '#000000',
+              formatter: function(value, context) {
+                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                let percentage = (value / total * 100).toFixed(2) + '%';
+                return context.chart.data
+                labels[context.dataIndex] + ': ' + percentage;
+              }
+            }
+          }
+        }
+      });
+
+      // Create the "Copy to Clipboard" button
+      let copyToClipboardButton = document.createElement('button');
+      copyToClipboardButton.id = 'copy-to-clipboard';
+      copyToClipboardButton.innerHTML = 'Copy to Clipboard';
+      document.body.appendChild(copyToClipboardButton);
+
+      document.getElementById('copy-to-clipboard').addEventListener('click', function() {
+        let activeCanvas = document.querySelector('#viewport canvas');
+        html2canvas(activeCanvas, {
+          scale: 2 // Increase this number for a higher resolution
+        }).then(function(canvas) {
+          let imgData = canvas.toDataURL('image/jpeg', 0.92);
+          navigator.clipboard.writeText(imgData).then(function() {
+            alert('Image copied to clipboard');
+          }, function(err) {
+            alert('Failed to copy image: ' + err);
+          });
+        });
+      });
+    } // This closes the 'complete' function
+  }); // This closes the 'Papa.parse' function call
+}
+
+document.getElementById('pop-report').addEventListener('click', generatePopReport);
+
+// Booking insights
+document.getElementById('booking-insights').addEventListener('click', function() {
+  // Clear the viewport
+  document.getElementById('viewport').innerHTML = '';
+  if (!hubData || !airplaneData) {
+    alert('Please upload valid HUB and Airplane CSV files');
+    return;
+  }
+
+  var hotelCounts = {};
+  var hotelCommissions = {};
+  var biggestBooking = {
+    commission: 0,
+    date: ''
+  };
+  var directProviderCounts = {};
+  var popProviderCounts = {};
+  var campaignCounts = {};
+  var campaignCommissions = {};
+
+  for (var i = 0; i < hubData.length; i++) {
+    var hotel = hubData[i]['Info'];
+    var commission = parseFloat(hubData[i]['Commission']);
+
+    if (hubData[i]['Booking Status'] === 'APPROVED' && commission > biggestBooking.commission) {
+      biggestBooking.commission = commission;
+      biggestBooking.date = hubData[i]['Booked Date'];
+    }
+
+    var campaignId = hubData[i]['Campaign ID'];
+    if (campaignId) {
+      campaignId = campaignId.split(',')[0].trim();
+    } else {
+      continue;
+    }
+
+    if (!hotelCounts[hotel]) {
+      hotelCounts[hotel] = 0;
+      hotelCommissions[hotel] = 0;
+    }
+    hotelCounts[hotel]++;
+    hotelCommissions[hotel] += commission;
+
+    if (!campaignCounts[campaignId]) {
+      campaignCounts[campaignId] = 0;
+      campaignCommissions[campaignId] = 0;
+    }
+    campaignCounts[campaignId]++;
+    campaignCommissions[campaignId] += commission;
+  }
+
+  for (var i = 0; i < airplaneData.length; i++) {
+    if (airplaneData[i]['status'] === 'approved') {
+      var provider = airplaneData[i]['provider'];
+      if (airplaneData[i]['source'] === 'direct') {
+        if (!directProviderCounts[provider]) {
+          directProviderCounts[provider] = 0;
+        }
+        directProviderCounts[provider]++;
+      } else if (airplaneData[i]['source'] === 'pop') {
+        if (!popProviderCounts[provider]) {
+          popProviderCounts[provider] = 0;
+        }
+        popProviderCounts[provider]++;
+      }
+    }
+  }
+
+  var mostBookedHotel = Object.keys(hotelCounts).reduce(function(a, b) {
+    return hotelCounts[a] > hotelCounts[b] || (hotelCounts[a] === hotelCounts[b] && hotelCommissions[a] > hotelCommissions[b]) ? a : b;
+  }, '');
+
+  var mostBookedDirectProvider = Object.keys(directProviderCounts).reduce(function(a, b) {
+    return directProviderCounts[a] > directProviderCounts[b] ? a : b;
+  }, '');
+
+  var mostBookedPopProvider = Object.keys(popProviderCounts).reduce(function(a, b) {
+    return popProviderCounts[a] > popProviderCounts[b] ? a : b;
+  }, '');
+
+  var bestPerformingCampaignId = Object.keys(campaignCounts).reduce(function(a, b) {
+    return campaignCounts[a] > campaignCounts[b] ? a : b;
+  }, '');
+
+  var result = '<table><tr><th>Insight</th><th>Value</th></tr>';
+
+  if (mostBookedHotel) {
+    result += '<tr><td>Most booked hotel</td><td>' + mostBookedHotel + '</td></tr>';
+    result += '<tr><td>Number of times booked</td><td>' + hotelCounts[mostBookedHotel] + '</td></tr>';
+  }
+
+  result += '<tr><td>Biggest single booking</td><td>$' + biggestBooking.commission.toFixed(2) + ' (Booked on ' + biggestBooking.date + ')</td></tr>';
+  result += '<tr><td>Most booked Direct Provider</td><td>' + mostBookedDirectProvider + ' (' + directProviderCounts[mostBookedDirectProvider] + ' bookings)</td></tr>';
+  result += '<tr><td>Most booked POP Provider</td><td>' + mostBookedPopProvider + ' (' + popProviderCounts[mostBookedPopProvider] + ' bookings)</td></tr>';
+
+  if (bestPerformingCampaignId && campaignCommissions[bestPerformingCampaignId] !== undefined) {
+    result += '<tr><td>Best performing Campaign ID</td><td>' + bestPerformingCampaignId + ' (' + campaignCounts[bestPerformingCampaignId] + ' bookings, $' + campaignCommissions[bestPerformingCampaignId].toFixed(2) + ' total commission)</td></tr>';
+  }
+
+  result += '</table>';
+
+  document.getElementById('viewport').innerHTML = result;
 });
+
+
 </script>
-
-  </body>
+</body>
 
 </html>
