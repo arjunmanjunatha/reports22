@@ -1,22 +1,63 @@
-Imagine you're a front end UI developer. We need to build a tool to be used by a customer service rep to generate beautiful looking custom data and revenue reports with insights for our customers. 
-The customers are all travel affiliate partners, and the raw data contains information of the hotel bookings and other travel product sales associated with their account. 
-The raw data is available in two separate CSV files. One file is generated from airplane.dev task, and the other is downloaded from hub.stay22.com. 
-Both these CSV files contain the same data but have different head rows. 
-The tool should be able to either accept both these CSV as separate uploads or obtain the data automatically with webhooks or API or Zapier integrations, depending on viability. 
-The interface should allow the user to either upload the two different CSV files and get a validation that the input files / obtained data is in the expected format. 
-The interface screen should have different buttons corresponding to different report generators. Examples of reports are - comission aging projections, cancellation trends, most booked hotels,
-best performing providers, monthly booking performance reports, source of bookings direct vs pop and so on. I can think of at least 7 possible reports that can be generated. 
-The tool's interface should have a common viewport where the results of each report generator is displayed as and when the button is clicked. 
-Finally, there should also be a way for the user to choose the available reports, generate them and compile the results into a pdf which can be emailed to the partner. 
 
-I will define the contents of the head row of both CSV files. I have access to a heroku server for hosting a web app if that is the best way to build this tool. I have very limited developer knowledge, so I would prefer a solution
-which is not too complicated. I can follow step by step instructions to build this tool. 
+The following is the design document for a report generating dashboard tool. 
+Let us use the classic model - controller - view method of separating the different elements of this program. 
+For simplicity, let us split it into front end and backend. 
 
-I will also describe the logic and data manipulation and rules required to process data on both these sheets in future prompts. 
+First, here is the description for the front end part of the program. 
 
-As a modern, professional front end UI designer, how would you go about building this tool? 
+Title: Reports22
+Subtitle: Built with love by Arjun and ChatGPT
 
---------------
+Input element: 
+In the first version of the app, the inputs are two separate CSV files. Let us call them HUB CSV and AIRPLANE CSV. The HUB CSV is downloaded from the Hub, and AIRPLANE CSV is downloaded from Airplane. This element should be rendered as a floating box, in the middle of the screen. The box should have a heading titled: Please Upload CSVs. The box should have an upload button called upload file/s. The module should only accept a maximum of two CSV files at a time to upload. The uploaded files should be validates according to the rules I will describe in the backend functions. This box should also have a user text input field called AID. This input field should only accept text and no spaces. Once the files are selected and uploaded, the button should disappear and be replaced by a success message and move to the top of the page just below the title.  The page should then display the reports menu. 
 
-Provider report: 
+In the next iteration of this app, this input element will be replaced with user-input fields, namely an AID field, and a start date and end date. These inputs are then used to query a mongo database and the response JSON file becomes the data which is analysed and visualised. 
+
+Reports Menu: 
+This is a large inner html element containing a mosaic of big square tiles resembling windows phone home screen. Each tile displays the name of the report to be generated. These tiles have two conditions - clickable when the right input conditions are met, and the data is available and greyed out when the input conditions fail, with an additional line that either says "Upload HUB CSV" or "Upload AIRPLANE CSV" depending on whichever is missing. 
+
+Each tile will also have a checkbox on the top left. All or none of the tiles can be checked at any time. 
+
+When the download button is pressed, it triggers a run where all the reports corresponding to each checked tile are processed, results displayed with appropriate pagination in the results viewport and in the next step, propmt to confirm download, and on confirmation, compile these results into a pdf file and download it. 
+
+Results View: 
+The results for each report when the tile is clicked and sub options are confirmed, should be displayed in the results viewport. This is the same inner html that contains the reports menu. Once the first report tile is clicked and confirmed, the menu tiles should disappear and a Reports Menu button should appear to move to the left sidebar of the results viewport. 
+This viewport can either be an iframe or simple inner html, whichever serves the purpose better. 
+
+Common divs inside the results viewport for all reports: 
+- Partner: The value under partnerID in the AIRPLANE CSV. If no AIRPLANE CSV is uploaded, print the AID input by the user in the Input element. 
+- Date Range: This should display "earliet date" to "latest date" in the HUB CSV and AIRPLANE CSV of `Booked Date` and `insertedDate` respectively from one or both CSV inputs. These dates should be in mm-dd-yyyy format. 
+- Generated on: This should have the date of the day the report is generated. 
+The common divs should display on all results from all the functions on every downloaded report. 
+
+Output results: 
+These are different charts and other visualisations generated based on the data from the input files. We will need a powerful charting program in the backend to generate these charts and have the ability to compile these and download as a pdf. 
+
+Results navigation element: 
+This should be a container inside the viewport with the tab buttons for each result generated by a function. Clicking on these tab buttons should display the relevant tab containing the generated chart. 
+
+Download element: 
+This is the main way to transfer and share the results. In the first version, I intend to be able to generate a PDF file containing the selected results. Clicking this button should open up a menu containing all the available functions with checkboxes. If a menu item has sub-items, it should accommodate the checkbox logic of select all and individual item. After the checks, it should generate all the results, compile them into a different page of a pdf file with the appropriate heading and info from the common divs and publish as a PDF. 
+
+Footer: 
+This should contain the text: For feedback / complaints / ideas for improvement email: arjun@stay22.com with subject line "three randomly generated words" and generate three random words in the quotes. 
+
+The following contains the outline for the backend part of this program:
+
+Backend hosting: I have access to a heroku account. I have never set up a backend, and I will need step by step instructions on what I would need to do to set this up. 
+Ability to query mongo: In a future version of this app, the input will be text and a date range which should be used to query a Mongo database and process the results. 
+
+CSV Validation rules: I will build in the rules to validate the expected CSV input files respectively. 
+
+Logic for each report: This will have the rules and conditions to manipulate the data on the input files in order to generate the chart or table. 
+
+Error handling: If the input conditions are not met, or encounters bad data in the input, then it should display the relevant error message to rectify the situation. 
+
+Charts and tables: This module will have the rules and appearance settings of every result chart or table. The tables will be defined by the column headings. 
+
+Download results: This module should be able to compile results into a pdf to be downloaded. 
+
+
+
+
 
