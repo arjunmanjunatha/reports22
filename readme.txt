@@ -57,6 +57,15 @@ Charts and tables: This module will have the rules and appearance settings of ev
 
 Download results: This module should be able to compile results into a pdf to be downloaded. 
 
+CONTROLLER COMPONENTS:
+The following section will define the processing, data manipulation, input validation rules, and logic for the operation for each of the reports. 
+
+First I will describe the input files and their respective properties. 
+1. HUB CSV: This CSV contains the following header columns: Provider	Category	Booked Date	Start Date	End Date	Booking Status	Commission	Device	Campaign IDs	Nights	Info	Destination	Booking Id	User Country	Payment Status		
+Here are the features to take note of and the rules for what to do with null values. 
+
+`Provider` value should match `provider` 
+
 
 
 
